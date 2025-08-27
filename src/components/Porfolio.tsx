@@ -15,19 +15,35 @@ import {
   Smartphone,
 } from "lucide-react";
 import { SiGithub, SiLinkedin } from "react-icons/si";
-
-// --- Types ---------------------------------------------------------------
 import type { PropsWithChildren } from "react";
 
-// --- Simple helpers -------------------------------------------------------
-const Container = ({ children, id }: PropsWithChildren<{ id?: string }>) => (
-  <section id={id} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+// --- Layout helpers -------------------------------------------------------
+/** Fixed header height in px (h-14 = 56px). Used via scroll-mt utilities. */
+const HEADER_PX = 56;
+
+const cn = (...cls: (string | undefined | false)[]) =>
+  cls.filter(Boolean).join(" ");
+
+const Section = ({
+  children,
+  id,
+  className,
+}: PropsWithChildren<{ id?: string; className?: string }>) => (
+  <section
+    id={id}
+    className={cn(
+      // anchor offset so in-page links don't hide content under fixed nav
+      "scroll-mt-[72px]",
+      "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
+      className
+    )}
+  >
     {children}
   </section>
 );
 
 const Pill = ({ children }: PropsWithChildren) => (
-  <span className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium shadow-sm">
+  <span className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium shadow-sm whitespace-nowrap">
     {children}
   </span>
 );
@@ -38,7 +54,7 @@ interface SectionTitleProps {
   subtitle?: string;
 }
 const SectionTitle = ({ kicker, title, subtitle }: SectionTitleProps) => (
-  <div className="mb-10 text-center">
+  <div className="mb-8 text-center">
     {kicker && (
       <div className="mb-2 text-xs uppercase tracking-widest opacity-70">
         {kicker}
@@ -54,7 +70,7 @@ const SectionTitle = ({ kicker, title, subtitle }: SectionTitleProps) => (
 // --- Data -----------------------------------------------------------------
 const PROFILE = {
   name: "Edward Alvin Koesmanto",
-  role: "Software & ML Engineer",
+  role: "Software Engineer",
   blurb:
     "I build reliable systems across IoT, ML, and backend—turning messy ideas into usable tools and clear docs.",
   location: "Jakarta, Indonesia",
@@ -87,13 +103,13 @@ const PROJECTS = [
   {
     title: "IoTLabs",
     tags: ["Raspberry Pi", "PostgREST", "Next.js", "MQTT"],
-    desc: "End‑to‑end IoT telemetry and ops: Telegraf ingestion → Postgres → PostgREST → Next.js dashboard with live device control & key rotation simulation.",
+    desc: "End-to-end IoT telemetry and ops: Telegraf ingestion → Postgres → PostgREST → Next.js dashboard with live device control & key rotation simulation.",
     link: "#",
   },
   {
     title: "BeeLangue",
     tags: ["Android", "MLKit", "OCR", "Translation"],
-    desc: "Camera‑based object detection + instant translation with dynamic language selection and Espresso UI tests.",
+    desc: "Camera-based object detection + instant translation with dynamic language selection and Espresso UI tests.",
     link: "#",
   },
   {
@@ -122,9 +138,9 @@ const EXPERIENCE: ExperienceItem[] = [
     org: "Projects @ BINUS & Industry",
     time: "2023 — Present",
     bullets: [
-      "Designed a multi‑service IoT stack: Supabase Postgres, Kong, OTAPlatform (FastAPI), HSM proxy, and Next.js UI.",
-      "Built ML/NLP pipelines (BERT, TF‑IDF, Word2Vec) and evaluation tooling with confusion matrices & loss curves.",
-      "Containerized services, automated setup scripts, and deployment to Raspberry Pi 4 with SIM‑modem connectivity.",
+      "Designed a multi-service IoT stack: Supabase Postgres, Kong, OTAPlatform (FastAPI), HSM proxy, and Next.js UI.",
+      "Built ML/NLP pipelines (BERT, TF-IDF, Word2Vec) and evaluation tooling with confusion matrices & loss curves.",
+      "Containerized services, automated setup scripts, and deployment to Raspberry Pi 4 with SIM-modem connectivity.",
     ],
   },
 ];
@@ -166,16 +182,18 @@ const Nav = ({ open, setOpen }: NavProps) => {
 
   return (
     <div
-      className={`fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-background/70 ${
-        scrolled ? "border-b" : ""
-      }`}
+      className={cn(
+        "fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-background/70",
+        scrolled ? "border-b shadow-sm" : ""
+      )}
+      style={{ height: HEADER_PX }}
     >
-      <Container>
-        <div className="flex items-center justify-between h-14">
+      <Section className="h-full">
+        <div className="flex items-center justify-between h-full">
           <a href="#home" className="font-semibold tracking-tight">
             {PROFILE.name}
           </a>
-          <div className="hidden md:flex gap-1 items-center">
+          <nav className="hidden md:flex gap-1 items-center">
             <a className={link} href="#projects">
               Projects
             </a>
@@ -194,7 +212,7 @@ const Nav = ({ open, setOpen }: NavProps) => {
             >
               <Download className="w-4 h-4" /> Resume
             </a>
-          </div>
+          </nav>
           <button
             className="md:hidden p-2"
             onClick={() => setOpen(!open)}
@@ -204,40 +222,52 @@ const Nav = ({ open, setOpen }: NavProps) => {
           </button>
         </div>
         {open && (
-          <div className="md:hidden pb-4 grid gap-2">
-            <a className={link} href="#projects" onClick={() => setOpen(false)}>
-              Projects
-            </a>
-            <a className={link} href="#skills" onClick={() => setOpen(false)}>
-              Skills
-            </a>
-            <a
-              className={link}
-              href="#experience"
-              onClick={() => setOpen(false)}
-            >
-              Experience
-            </a>
-            <a className={link} href="#contact" onClick={() => setOpen(false)}>
-              Contact
-            </a>
-            <a
-              className="mt-2 inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm hover:bg-primary hover:text-primary-foreground transition"
-              href={PROFILE.resume}
-            >
-              <Download className="w-4 h-4" /> Resume
-            </a>
+          <div className="md:hidden absolute left-0 right-0 mt-2 pb-4 bg-background/95 backdrop-blur border-t">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-2 pt-3">
+              <a
+                className={link}
+                href="#projects"
+                onClick={() => setOpen(false)}
+              >
+                Projects
+              </a>
+              <a className={link} href="#skills" onClick={() => setOpen(false)}>
+                Skills
+              </a>
+              <a
+                className={link}
+                href="#experience"
+                onClick={() => setOpen(false)}
+              >
+                Experience
+              </a>
+              <a
+                className={link}
+                href="#contact"
+                onClick={() => setOpen(false)}
+              >
+                Contact
+              </a>
+              <a
+                className="mt-2 inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm hover:bg-primary hover:text-primary-foreground transition"
+                href={PROFILE.resume}
+              >
+                <Download className="w-4 h-4" /> Resume
+              </a>
+            </div>
           </div>
         )}
-      </Container>
+      </Section>
     </div>
   );
 };
 
 const Hero = () => (
-  <div className="pt-24 pb-16">
-    <Container id="home">
-      <div className="grid lg:grid-cols-2 gap-10 items-center">
+  <div className="pt-[88px] pb-16">
+    {" "}
+    {/* extra top padding so hero never hides under nav */}
+    <Section id="home">
+      <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -262,19 +292,22 @@ const Hero = () => (
             ))}
           </div>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="order-first lg:order-none"
         >
+          {/* stable box to avoid layout shift, centered content */}
           <div className="relative aspect-[4/3] w-full rounded-3xl border overflow-hidden shadow-lg">
             <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 gap-px p-px">
               {Array.from({ length: 36 }).map((_, i) => (
                 <div key={i} className="bg-muted/40" />
               ))}
             </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
+            <div className="absolute inset-0 flex items-center justify-center p-6">
+              <div className="text-center max-w-md">
                 <p className="text-xs uppercase tracking-widest opacity-70">
                   Selected Stacks
                 </p>
@@ -292,12 +325,12 @@ const Hero = () => (
           </div>
         </motion.div>
       </div>
-    </Container>
+    </Section>
   </div>
 );
 
 const Projects = () => (
-  <Container id="projects">
+  <Section id="projects" className="mt-2">
     <SectionTitle
       kicker="Work"
       title="Featured Projects"
@@ -308,16 +341,16 @@ const Projects = () => (
         <motion.a
           key={p.title}
           href={p.link}
-          className="group block rounded-2xl border overflow-hidden hover:shadow-lg transition shadow-sm"
+          className="group flex flex-col rounded-2xl border overflow-hidden hover:shadow-lg transition shadow-sm h-full"
           whileHover={{ y: -2 }}
         >
           <div className="aspect-video bg-gradient-to-br from-muted to-background" />
-          <div className="p-4">
+          <div className="p-4 flex-1 flex flex-col">
             <div className="flex items-start justify-between gap-3">
               <h3 className="font-semibold text-lg group-hover:underline underline-offset-4">
                 {p.title}
               </h3>
-              <ExternalLink className="w-4 h-4 opacity-60 group-hover:opacity-100" />
+              <ExternalLink className="w-4 h-4 shrink-0 opacity-60 group-hover:opacity-100" />
             </div>
             <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -331,11 +364,11 @@ const Projects = () => (
         </motion.a>
       ))}
     </div>
-  </Container>
+  </Section>
 );
 
 const Skills = () => (
-  <Container id="skills">
+  <Section id="skills">
     <SectionTitle
       kicker="Toolkit"
       title="Skills & Stacks"
@@ -349,11 +382,11 @@ const Skills = () => (
         </div>
       ))}
     </div>
-  </Container>
+  </Section>
 );
 
 const Experience = () => (
-  <Container id="experience">
+  <Section id="experience">
     <SectionTitle
       kicker="Path"
       title="Experience"
@@ -375,15 +408,15 @@ const Experience = () => (
         </div>
       ))}
     </div>
-  </Container>
+  </Section>
 );
 
 const Contact = () => (
-  <Container id="contact">
+  <Section id="contact">
     <SectionTitle
       kicker="Say hi"
       title="Contact"
-      subtitle="Open to internships, research collabs, and build‑something‑cool projects."
+      subtitle="Open to internships, research collabs, and build-something-cool projects."
     />
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 rounded-2xl border p-6">
@@ -391,20 +424,24 @@ const Contact = () => (
         <p className="text-sm text-muted-foreground mt-1">
           This mini form opens your email client.
         </p>
-        <form className="mt-4" action={PROFILE.email}>
+        {/* mailto forms work best with method=GET */}
+        <form className="mt-4" action={PROFILE.email} method="GET">
           <div className="grid sm:grid-cols-2 gap-3">
             <input
+              name="subject"
               required
               className="w-full rounded-md border px-3 py-2"
               placeholder="Your name"
             />
             <input
+              name="cc"
               required
               className="w-full rounded-md border px-3 py-2"
               placeholder="Your email"
             />
           </div>
           <textarea
+            name="body"
             required
             className="mt-3 w-full rounded-md border px-3 py-2 min-h-[120px]"
             placeholder="Tell me about your idea…"
@@ -438,9 +475,10 @@ const Contact = () => (
         </a>
       </div>
     </div>
-  </Container>
+  </Section>
 );
 
+// --- Page -----------------------------------------------------------------
 export default function Portfolio() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -453,22 +491,21 @@ export default function Portfolio() {
     <main className="min-h-screen antialiased">
       {/* gradient background */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-background via-background to-background" />
-
       <Nav open={open} setOpen={setOpen} />
       <Hero />
-      <div className="space-y-20 pb-24">
+      <div className="space-y-20 lg:space-y-24 pb-24">
         <Projects />
         <Skills />
         <Experience />
         <Contact />
       </div>
       <footer className="border-t py-8">
-        <Container>
+        <Section>
           <p className="text-center text-sm text-muted-foreground">
             © {new Date().getFullYear()} Edward Alvin Koesmanto. Built with
             Next.js, Tailwind, and Motion.
           </p>
-        </Container>
+        </Section>
       </footer>
     </main>
   );
